@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="net.huitel.pucapab.MainActivity"
+    tools:showIn="@layout/app_bar_main">
+
+    <EditText
+        android:id="@+id/barcode"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:inputType="text"
+        android:text="@string/Amuesli_traces_de_gluten" />
+
+
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_alignParentStart="false"
+        android:layout_below="@id/barcode" />
+
+    <Button
+        android:id="@+id/checkGluten"
+        android:layout_width="128dp"
+        android:layout_height="40dp"
+        android:layout_below="@id/result"
+        android:layout_centerHorizontal="true"
+        android:text="Gluten?"
+        />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/scan_fragment"
+        android:orientation="horizontal">
+
+    </LinearLayout>
+
+
+</RelativeLayout>

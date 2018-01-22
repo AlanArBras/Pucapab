@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Pucapab</string>
+
+    <!--nav_header_main-->
+    <string name="navigation_header_title">Le gluten? Je suis pucapab!</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="contains_gluten">Présence de gluten, PAS TOUCHE!</string>
+    <string name="traces_of_gluten">Traces de gluten, à éviter</string>
+    <string name="gluten_free">Pas de gluten, GO :)</string>
+    <string name="presence_of_gluten_unknown">Pas d\'info sur le gluten, attention</string>
+    <string name="product_not_found">Produit introuvable, attention</string>
+
+
+
+    <string name="Acristalline">3274080005003</string>
+    <string name="Agranola_avec_gluten">3017760826  174</string>
+    <string name="Amuesli_traces_de_gluten">5010477301246</string>
+    <string name="ACoconut_Water_label_gluten_free">0898999007106</string>
+
+
+    <string name="scan_bar_code">Scan a Bar Code</string>
+
+</resources>
