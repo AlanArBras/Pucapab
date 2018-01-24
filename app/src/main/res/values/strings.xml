@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Pucapab</string>
+    <string name="cancel">Annuler</string>
+    <string name="ok">OK</string>
 
     <!--nav_header_main-->
     <string name="navigation_header_title">Le gluten? Je suis pucapab!</string>
@@ -13,15 +15,20 @@
     <string name="gluten_free">Pas de gluten, GO :)</string>
     <string name="presence_of_gluten_unknown">Pas d\'info sur le gluten, attention</string>
     <string name="product_not_found">Produit introuvable, attention</string>
+    <string name="parsing_error">Erreur, essaie à nouveau</string>
 
 
 
     <string name="Acristalline">3274080005003</string>
-    <string name="Agranola_avec_gluten">3017760826  174</string>
+    <string name="Agranola_avec_gluten">3017760826174</string>
     <string name="Amuesli_traces_de_gluten">5010477301246</string>
     <string name="ACoconut_Water_label_gluten_free">0898999007106</string>
 
 
     <string name="scan_bar_code">Scan a Bar Code</string>
+
+    <string name="call_snackbar_text">Appel du Bro…</string>
+
+    <string name="call_bro">Appeler le BRO</string>
 
 </resources>

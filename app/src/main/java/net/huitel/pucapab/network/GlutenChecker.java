@@ -6,6 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static net.huitel.pucapab.network.GlutenChecker.GlutenPresence.ERROR;
 import static net.huitel.pucapab.network.GlutenChecker.GlutenPresence.GLUTEN;
 import static net.huitel.pucapab.network.GlutenChecker.GlutenPresence.GLUTEN_FREE;
 import static net.huitel.pucapab.network.GlutenChecker.GlutenPresence.NOT_FOUND;
@@ -18,9 +19,20 @@ import static net.huitel.pucapab.network.GlutenChecker.GlutenPresence.UNKNOWN;
 
 public class GlutenChecker {
     public enum GlutenPresence {
-        GLUTEN, TRACES, GLUTEN_FREE, UNKNOWN, NOT_FOUND
+        GLUTEN, TRACES, GLUTEN_FREE, UNKNOWN, NOT_FOUND, ERROR
     }
 
+    public static String getProductName(JSONObject fullDetails){
+        if(fullDetails == null || fullDetails.isNull("product"))
+            return "Produit introuvable";
+        try {
+            JSONObject product = fullDetails.getJSONObject("product");
+            return (String) product.get("product_name");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return "Produit introuvable";
+        }
+    }
     public static GlutenPresence getGlutenPresence(JSONObject fullDetails) {
         try {
             if(fullDetails == null || fullDetails.isNull("product"))
@@ -61,10 +73,8 @@ public class GlutenChecker {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-            return UNKNOWN;
+            return ERROR;
         }
-
-
     }
 
     public static GlutenPresence getGlutenPresence(JSONArray product) {
@@ -72,7 +82,7 @@ public class GlutenChecker {
             return getGlutenPresence(product.getJSONObject(0));
         } catch (JSONException e) {
             e.printStackTrace();
-            return UNKNOWN;
+            return ERROR;
         }
     }
 
