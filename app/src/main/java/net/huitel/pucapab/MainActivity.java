@@ -7,7 +7,6 @@ import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -16,10 +15,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -46,9 +43,6 @@ import cz.msebera.android.httpclient.Header;
  */
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback, NavigationView.OnNavigationItemSelectedListener {
-
-    private static final int PERMISSION_REQUEST_CAMERA = 0;
-    private static final int PERMISSION_REQUEST_CALL_PHONE = 1;
 
     private CodeScanner mCodeScanner;
     CodeScannerView scannerView;
@@ -122,6 +116,7 @@ public class MainActivity extends AppCompatActivity
         mainButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //TODO Gérer une animation de fading pour l'apparition de la caméra
                 scanNow(view);
             }
         });
@@ -156,13 +151,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        mCodeScanner.startPreview();
     }
 
     @Override
     protected void onPause() {
+        mCodeScanner.setFlashEnabled(false);
         mCodeScanner.stopPreview();
         mCodeScanner.releaseResources();
+        scannerView.setVisibility(View.GONE);
         super.onPause();
     }
 
@@ -205,7 +201,7 @@ public class MainActivity extends AppCompatActivity
             mCodeScanner.startPreview();
         } else {
             // Permission is missing and must be requested.
-            requestCameraPermission();
+            requestPermission(PermissionRequest.CAMERA);
         }
         // END_INCLUDE(scanNow)
 
@@ -216,6 +212,8 @@ public class MainActivity extends AppCompatActivity
      *
      */
     private void checkGluten(String barcode) {
+        //TODO Ajouter une animation au niveau du bouton principal pour indiquer le chargement pendant la recherche
+        //TODO Ajouter une détection de l'accès à internet: demande d'activation du Wifi ou de la 4G si besoin
         HttpUtils.get(barcode, new RequestParams(), new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -234,7 +232,7 @@ public class MainActivity extends AppCompatActivity
                         text = getString(R.string.presence_of_gluten_unknown);
                         break;
                     case NOT_FOUND:
-                        //TODO check another database
+                        //TODO Rechercher le produit dans une autre base de données pouvant déterminer la présence ou non de gluten
                         text = getString(R.string.product_not_found);
                         break;
                     default:
@@ -318,7 +316,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(callIntent);
             } else {
                 // Permission is missing and must be requested.
-                requestCallPhonePermission();
+                requestPermission(PermissionRequest.CALL_PHONE);
             }
 
         }
@@ -328,7 +326,7 @@ public class MainActivity extends AppCompatActivity
     public void onRequestPermissionsResult(int requestCode, String[] permissions,
                                            int[] grantResults) {
         // BEGIN_INCLUDE(onRequestPermissionsResult)
-        if (requestCode == PERMISSION_REQUEST_CAMERA) {
+        if (requestCode == PermissionRequest.CAMERA.getRequestCode()) {
             // Request for camera permission.
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 scanNow(scannerView);
@@ -338,7 +336,17 @@ public class MainActivity extends AppCompatActivity
                         Snackbar.LENGTH_LONG)
                         .show();
             }
-        } else if (requestCode == PERMISSION_REQUEST_CALL_PHONE) {
+        } else if (requestCode == PermissionRequest.CALL_PHONE.getRequestCode()) {
+            // Request for CALL_PHONE permission.
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                callBro(scannerView);
+            } else {
+                // Permission request was denied.
+                Snackbar.make(scannerView, "Autorisation d'accès à la fonction d'appel refusée, impossible d'appeler le BRO",
+                        Snackbar.LENGTH_LONG)
+                        .show();
+            }
+        } else if (requestCode == PermissionRequest.INTERNET.getRequestCode()) {
             // Request for CALL_PHONE permission.
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 callBro(scannerView);
@@ -352,63 +360,32 @@ public class MainActivity extends AppCompatActivity
         // END_INCLUDE(onRequestPermissionsResult)
     }
 
+
     /**
-     * Requests the {@link android.Manifest.permission#CAMERA} permission.
+     * Requests a permission.
      * If an additional rationale should be displayed, the user has to launch the request from
      * a SnackBar that includes additional information.
      */
-    private void requestCameraPermission() {
+    private void requestPermission(PermissionRequest permissionRequest) {
+        final String manifestPermission = permissionRequest.getManifestPermission();
+        final int requestCode = permissionRequest.getRequestCode();
+
         // Permission has not been granted and must be requested.
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CAMERA)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // Display a SnackBar with a button to request the missing permission.
-            Snackbar.make(scannerView, "L'accès à la caméra est nécessaire pour pouvoir scanner le code barre des articles à vérifier.",
-                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                manifestPermission)) {
+            Snackbar.make(scannerView, permissionRequest.getExplanation(), Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     // Request the permission
                     ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.CAMERA},
-                            PERMISSION_REQUEST_CAMERA);
+                            new String[]{manifestPermission},
+                            requestCode);
                 }
-            }).show();
-
+            });
         } else {
             // Request the permission. The result will be received in onRequestPermissionResult().
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
-                    PERMISSION_REQUEST_CAMERA);
-        }
-    }
-
-    /**
-     * Requests the {@link android.Manifest.permission#CAMERA} permission.
-     * If an additional rationale should be displayed, the user has to launch the request from
-     * a SnackBar that includes additional information.
-     */
-    private void requestCallPhonePermission() {
-        // Permission has not been granted and must be requested.
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                Manifest.permission.CALL_PHONE)) {
-            // Provide an additional rationale to the user if the permission was not granted
-            // and the user would benefit from additional context for the use of the permission.
-            // Display a SnackBar with a button to request the missing permission.
-            Snackbar.make(scannerView, "L'accès à la fonction d'appel sert à appeler le BRO en cas de problème.",
-                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    // Request the permission
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.CALL_PHONE},
-                            PERMISSION_REQUEST_CALL_PHONE);
-                }
-            }).show();
-
-        } else {
-            // Request the permission. The result will be received in onRequestPermissionResult().
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CALL_PHONE},
-                    PERMISSION_REQUEST_CALL_PHONE);
+            ActivityCompat.requestPermissions(this, new String[]{manifestPermission},
+                    requestCode);
         }
     }
 
